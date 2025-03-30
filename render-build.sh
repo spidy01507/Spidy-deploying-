@@ -4,7 +4,7 @@ set -e  # Exit on error
 echo "Checking CMake version..."
 cmake --version
 
-echo "Updating and installing dependencies..."
+echo "Updating and installing dependencies"
 apt-get update 
 apt-get install -y cmake g++ make \
     libopenblas-dev liblapack-dev \
