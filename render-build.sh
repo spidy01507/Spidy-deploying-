@@ -1,17 +1,18 @@
 #!/bin/bash
 
-# Update package lists and install system dependencies
-apt-get update && apt-get install -y cmake g++ make \
-    libopenblas-dev liblapack-dev libx11-dev libgtk-3-dev
+# Update package list
+apt-get update 
 
-apt-get update && apt-get install -y cmake libx11-dev libatlas-base-dev \
-    libgtk2.0-dev libboost-all-dev python3-dev
+# Install dependencies for dlib
+apt-get install -y cmake g++ make \
+    libopenblas-dev liblapack-dev \
+    libx11-dev libgtk-3-dev libboost-all-dev
 
-# Upgrade pip
-pip install --upgrade pip
+# Force reinstall CMake (if needed)
+pip install --upgrade cmake
 
-# Install dlib
-pip install --no-cache-dir dlib==19.24.2
+# Install dlib with specific version
+pip install dlib==19.24.2
 
-# Install other dependencies from requirements.txt
+# Install other Python dependencies
 pip install --no-cache-dir -r requirements.txt
