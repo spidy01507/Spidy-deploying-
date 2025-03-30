@@ -14,5 +14,6 @@ cmake --version  # Verify that it's installed correctly
 # Install dlib separately before other requirements
 pip install --no-cache-dir dlib==19.24.2
 
+pip uninstall -y torch torchvision torchaudio || true
 # Finally, install all requirements from requirements.txt
 pip install --no-cache-dir -r requirements.txt
