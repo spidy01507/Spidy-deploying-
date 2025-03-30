@@ -1,29 +1,23 @@
 #!/bin/bash
 
-# Update and install dependencies
+# Update package list
 apt-get update 
 
+# Install required dependencies
 apt-get install -y cmake g++ make \
     libopenblas-dev liblapack-dev \
     libx11-dev libgtk-3-dev libboost-all-dev
 
-# Upgrade CMake
+# Upgrade to the latest version of CMake
 pip install --upgrade cmake
 apt-get install -y cmake
 
-# Clone dlib repository
-git clone https://github.com/davisking/dlib.git
-cd dlib
+# Check CMake version
+cmake --version
 
-# Create build directory and build dlib
-mkdir build
-cd build
-cmake ..
-cmake --build .
-cd ..
+# Set minimum CMake policy version and install dlib
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
+CMAKE_POLICY_VERSION_MINIMUM=3.5 pip install dlib==19.24.2
 
-# Install dlib
-python setup.py install
-
-# Install other dependencies
+# Install remaining dependencies
 pip install --no-cache-dir -r requirements.txt
