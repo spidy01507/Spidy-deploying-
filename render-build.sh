@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Update package list and install dependencies
+# Update and install dependencies
 apt-get update 
 
 apt-get install -y cmake g++ make \
@@ -11,11 +11,19 @@ apt-get install -y cmake g++ make \
 pip install --upgrade cmake
 apt-get install -y cmake
 
-# Check CMake version
-cmake --version
+# Clone dlib repository
+git clone https://github.com/davisking/dlib.git
+cd dlib
 
-# Install dlib with explicit CMake policy version
-CMAKE_POLICY_VERSION_MINIMUM=3.5 pip install dlib==19.24.2
+# Create build directory and build dlib
+mkdir build
+cd build
+cmake ..
+cmake --build .
+cd ..
+
+# Install dlib
+python setup.py install
 
 # Install other dependencies
 pip install --no-cache-dir -r requirements.txt
