@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+spidy-e12b6-firebase-adminsdk-fbsvc-c6167aba01.json

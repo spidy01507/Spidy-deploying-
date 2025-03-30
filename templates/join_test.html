@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaze & Object Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f4c75, #3282b8);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin-top: 60px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+
+        
+        h1, h2 {
+            color:rgb(255, 255, 255);
+            font-weight: bold;
+        }
+        
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+            border: none;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        /* Transcription Box */
+        textarea {
+            width: 100%;
+            resize: none;
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        #ai-feedback {
+            min-height: 50px;
+            background: #f1f3f5;
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-style: italic;
+        }
+        
+        /* Video Feed */
+        .video-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        /* Button Base */
+
+/* Button Hover & Active Effects */
+ /* Button Base */
+/* Button Base */
+button {
+    width: 40%;  /* Reduced to 40% */
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    transition: all 0.3s ease-in-out;
+    display: block;
+    margin: 10px auto; /* Centers the button */
+}
+.btn-primary{
+    background:rgb(62, 175, 227);
+}
+/* Button Hover & Active Effects */
+.btn-primary:hover { background:rgb(27, 143, 196); transform: scale(1.05); }
+.btn-danger:hover { background: #a71d2a; transform: scale(1.05); }
+.btn-success:hover { background: #1e7e34; transform: scale(1.05); }
+.btn-secondary:hover { background: #545b62; transform: scale(1.05); }
+
+/* Recording Animation */
+@keyframes recording {
+    0% { box-shadow: 0 0 5px #ff0000; }
+    50% { box-shadow: 0 0 20px #ff0000; }
+    100% { box-shadow: 0 0 5px #ff0000; }
+}
+
+.recording {
+    animation: recording 1s infinite alternate;
+    background: red !important;
+    color: white;
+}
+
+
+        .video-container img {
+            width: auto;
+            height: 15vh;
+        }
+        /* Loader Container (Hidden by Default) */
+.loader-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(3px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+/* Loader Animation */
+.loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #007bff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.navbar {
+    background-color: #1e2a33 !important;
+    padding: 10px 20px;
+    height: auto;
+}
+
+.navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.username {
+    font-weight: bold;
+    color: #eeeeee;
+    padding-right: 10px;
+}
+
+
+
+.navbar-brand {
+    font-size: 22px;
+    color: #00adb5 !important;
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: #00adb5 !important;
+}
+.logout-btn {
+    background: #ff4d4d;
+    color: white;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.logout-btn:hover {
+    background: #d63031;
+}
+#ai-feedback{
+    color: black
+}
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ url_for('static', filename='Images/spidy_logo.png') }}" alt="Spidy Logo" height="40" class="me-2">
+                Spidy
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('aboutus') }}">About Us</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav d-flex align-items-center">
+                    <li class="nav-item">
+                        <span class="username">{{ username }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('logout') }}" class="btn logout-btn">Log Out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <h1>Real-time Gaze & Object Detection</h1>
+        
+        <h2 class="mb-4">Audio Quiz</h2>
+        
+        <button id="fetch-questions-btn" class="btn btn-info">Load Questions</button>
+        <div id="question-container" class="mt-4" style="display: none;">
+            <h4 id="question-text" class="d-inline"></h4>
+            <span id="marks-text" class="text-muted ms-2"></span>
+
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <button id="start-btn" class="btn btn-primary">Start Recording</button>
+                <button id="stop-btn" class="btn btn-danger" disabled>Stop Recording</button>
+            </div>
+            
+            <h4 class="mt-4">Transcription:</h4>
+            <textarea id="transcription" class="form-control" rows="3" readonly></textarea>
+            
+            <button id="check-btn" class="btn btn-success mt-3">Check Answer</button>
+            
+            <h4 class="mt-4">AI Feedback: (It is feedback for Improvement)</h4>
+            <p id="ai-feedback" class="border p-3"></p>
+
+            <button id="next-btn" class="btn btn-secondary mt-3" style="display: none;">Next Question</button>
+        </div>
+    </div>
+    
+    <div class="video-container" style="display: none;">
+        <img src="{{ url_for('video_feed') }}">
+    </div>
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+        <p>Processing...</p>
+    </div>
+    
+</body>
+</html>
+
+    <script>
+        let questions = [];
+        let currentQuestionIndex = 0;
+
+        document.getElementById("fetch-questions-btn").addEventListener("click", function () {
+            const inputCode = prompt("Enter Test Code:");
+            if (!inputCode) return;
+            if (inputCode) {
+                alert("Test Code Verified. Click OK to start.");
+                document.querySelector(".video-container").style.display = "block"; // Show video feed
+            }
+        
+            fetch("/get_questions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ input_code: inputCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.questions && data.questions.length > 0) {
+                    questions = data.questions;
+                    currentQuestionIndex = 0;
+                    showQuestion();
+        
+                    // 🎯 Hide Load Questions Button After Fetching
+                    document.getElementById("fetch-questions-btn").style.display = "none";
+                } else {
+                    alert("No questions found. Please check the test code.");
+                }
+            })
+            .catch(() => {
+                alert("Error loading questions. Please try again.");
+            });
+        });
+        
+
+        function showQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                document.getElementById("question-container").style.display = "block";
+                document.getElementById("question-text").innerText = questions[currentQuestionIndex].question;
+        
+                // Display the marks for the current question
+                document.getElementById("marks-text").innerText = `Marks: ${questions[currentQuestionIndex].marks}`;
+        
+                document.getElementById("transcription").value = "";
+                document.getElementById("ai-feedback").innerText = "";
+                document.getElementById("next-btn").style.display = "none";
+            } else {
+                document.querySelector(".video-container").style.display = "none"; // Hide video feed
+                alert("Quiz completed!");
+            }
+        }
+        
+
+        document.getElementById("start-btn").addEventListener("click", function() {
+            fetch("/start", { method: "POST" })
+                .then(() => {
+                    document.getElementById("start-btn").disabled = true;
+                    document.getElementById("stop-btn").disabled = false;
+                });
+        });
+
+        document.getElementById("stop-btn").addEventListener("click", function() {
+            fetch("/stop", { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("transcription").value = data.transcription;
+                    document.getElementById("start-btn").disabled = false;
+                    document.getElementById("stop-btn").disabled = true;
+                });
+        });
+        document.getElementById("check-btn").addEventListener("click", function () {
+            const question = questions[currentQuestionIndex].question;
+            const answer = document.getElementById("transcription").value;
+            const marks = questions[currentQuestionIndex].marks;
+        
+            fetch("/check_answer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: question, answer: answer, marks: marks })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("ai-feedback").innerHTML = data.evaluation;
+                document.getElementById("next-btn").style.display = "block";
+        
+                console.log("Awarded Marks:", data.awarded_marks); // Debugging step
+        
+                if (data.awarded_marks !== undefined) {
+                    questions[currentQuestionIndex].awarded_marks = data.awarded_marks;
+                } else {
+                    questions[currentQuestionIndex].awarded_marks = 0;  // Handle case where marks are not returned
+                }
+            });
+        });
+        document.getElementById("next-btn").addEventListener("click", function () {
+            currentQuestionIndex++;
+        
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                // Compute total marks
+                let totalMarksObtained = questions.reduce((sum, q) => sum + (q.awarded_marks || 0), 0);
+                let totalMarksAvailable = questions.reduce((sum, q) => sum + q.marks, 0);
+        
+                console.log("Final Total:", totalMarksObtained, "/", totalMarksAvailable); // Debugging
+        
+                // Display final score
+                document.getElementById("question-container").innerHTML = `
+                    <h2>Quiz Completed!</h2>
+                    <p>Your total score: <strong>${totalMarksObtained} / ${totalMarksAvailable}</strong></p>
+                `;
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const startBtn = document.getElementById("start-btn");
+            const stopBtn = document.getElementById("stop-btn");
+        
+            stopBtn.style.display = "none"; // Hide Stop Button Initially
+        
+            startBtn.addEventListener("click", function () {
+                startBtn.style.display = "none";  // Hide Start Button
+                stopBtn.style.display = "inline-block"; // Show Stop Button
+                stopBtn.classList.add("recording"); // Add Animation
+            });
+        
+            stopBtn.addEventListener("click", function () {
+                stopBtn.style.display = "none";  // Hide Stop Button
+                startBtn.style.display = "inline-block"; // Show Start Button
+                stopBtn.classList.remove("recording"); // Remove Animation
+            });
+        });
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            const startBtn = document.getElementById("start-btn");
+            const stopBtn = document.getElementById("stop-btn");
+            const checkBtn = document.getElementById("check-btn");
+        
+            stopBtn.style.display = "none"; // Hide Stop Button Initially
+            checkBtn.style.display = "none"; // Hide "Check Answer" Initially
+        
+            startBtn.addEventListener("click", function () {
+                startBtn.style.display = "none";  // Hide Start Button
+                stopBtn.style.display = "block"; // Show Stop Button
+                stopBtn.classList.add("recording"); // Add Animation
+                checkBtn.style.display = "none"; // Hide "Check Answer" while recording
+            });
+        
+            stopBtn.addEventListener("click", function () {
+                stopBtn.style.display = "none";  // Hide Stop Button
+                startBtn.style.display = "block"; // Show Start Button
+                stopBtn.classList.remove("recording"); // Remove Animation
+                checkBtn.style.display = "block"; // Show "Check Answer" after stopping
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+    const startBtn = document.getElementById("start-btn");
+    const stopBtn = document.getElementById("stop-btn");
+    const checkBtn = document.getElementById("check-btn");
+    const loader = document.getElementById("loader");
+    const transcriptionBox = document.getElementById("transcription");
+
+    stopBtn.style.display = "none"; // Hide Stop Button Initially
+    checkBtn.style.display = "none"; // Hide "Check Answer" Initially
+    loader.style.display = "none"; // Hide Loader Initially
+
+    // 🎤 Start Recording - Hide Start, Show Stop
+    startBtn.addEventListener("click", function () {
+        startBtn.style.display = "none"; // Hide Start Button
+        stopBtn.style.display = "block"; // Show Stop Button
+        stopBtn.classList.add("recording"); // Add Animation Effect
+        checkBtn.style.display = "none"; // Hide "Check Answer" while recording
+    });
+
+    // 🛑 Stop Recording - Hide Stop, Show Loader, Wait for Transcription
+    stopBtn.addEventListener("click", function () {
+        stopBtn.style.display = "none"; // Hide Stop Button
+        stopBtn.classList.remove("recording"); // Remove Animation
+        loader.style.display = "flex"; // Show Loader
+        transcriptionBox.value = "Processing..."; // Placeholder to prevent "undefined"
+
+        fetch("/stop", { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display = "none"; // Hide Loader
+                if (data.transcription) {
+                    transcriptionBox.value = data.transcription; // Set Transcription
+                } else {
+                    transcriptionBox.value = "Please Wait !";
+                }
+                startBtn.style.display = "block"; // Show Start Button Again
+                checkBtn.style.display = "block"; // Show "Check Answer"
+            })
+            .catch(() => {
+                loader.style.display = "none"; // Hide Loader on Error
+                transcriptionBox.value = "Error processing audio. Please try again.";
+                alert("Error in transcription. Please try again.");
+                startBtn.style.display = "block"; // Ensure Start is visible again
+            });
+    });
+
+    // ✅ Check Answer - Show Loader Until Feedback is Ready
+    checkBtn.addEventListener("click", function () {
+        checkBtn.disabled = true; // Disable Button
+        loader.style.display = "flex"; // Show Loader
+
+        const question = questions[currentQuestionIndex].question;
+        const answer = transcriptionBox.value;
+        const marks = questions[currentQuestionIndex].marks;
+
+        fetch("/check_answer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: question, answer: answer, marks: marks })
+        })
+        .then(response => response.json())
+        .then(data => {
+            loader.style.display = "none"; // Hide Loader
+            if (data.evaluation) {
+                document.getElementById("ai-feedback").innerHTML = data.evaluation;
+            } else {
+                document.getElementById("ai-feedback").innerHTML = "No feedback received.";
+            }
+            document.getElementById("next-btn").style.display = "block";
+            checkBtn.disabled = false; // Enable Button Again
+        })
+        .catch(() => {
+            loader.style.display = "none"; // Hide Loader on Error
+            alert("Error retrieving feedback. Please try again.");
+            checkBtn.disabled = false; // Enable Button Again
+        });
+    });
+});
+
+    </script>
+

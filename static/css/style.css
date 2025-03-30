@@ -1,0 +1,117 @@
+/* Scoped styles */
+.dashboard-buttons{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.dashboard-buttons .btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .dashboard-buttons .create-btn {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    background-color: white;
+    color: black;
+  }
+  
+  .dashboard-buttons .create-btn:hover {
+    background-color: #45a049;
+  }
+  
+  .dashboard-buttons .join-btn {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    background-color: white;
+    color: black;
+  }
+  
+  .dashboard-buttons .join-btn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dashboard-buttons .btn i {
+    font-size: 18px;
+  }
+  .video-container {
+    position: fixed;
+    bottom: 20px !important;
+    right: 20px !important;
+}
+.video-container img {
+    width: auto;
+    height: 15% !important;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+/* Gradient background */
+body {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Glassmorphism effect for card */
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    width: 400px;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    border: none;
+    font-weight: bold;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+    background: #00bcd4;
+    color: white;
+    border-radius: 5px;
+}
+
+/* Input fields */
+.form-control {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    border-radius: 5px;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Buttons */
+.btn-primary {
+    background: #00bcd4;
+    border: none;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    background: #008c9e;
+}
+
+/* Alerts */
+.alert {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}

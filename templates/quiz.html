@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Quiz App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h2 class="mb-4">Audio Quiz</h2>
+    
+    <button id="fetch-questions-btn" class="btn btn-info">Load Questions</button>
+    <div id="question-container" class="mt-4" style="display: none;">
+        <h4 id="question-text"></h4>
+        
+        <button id="start-btn" class="btn btn-primary">Start Recording</button>
+        <button id="stop-btn" class="btn btn-danger" disabled>Stop Recording</button>
+        
+        <h4 class="mt-4">Transcription:</h4>
+        <textarea id="transcription" class="form-control" rows="3" readonly></textarea>
+        
+        <button id="check-btn" class="btn btn-success mt-3">Check Answer</button>
+        
+        <h4 class="mt-4">AI Feedback:</h4>
+        <p id="ai-feedback" class="border p-3"></p>
+        
+        <button id="next-btn" class="btn btn-secondary mt-3" style="display: none;">Next Question</button>
+    </div>
+    
+    <script>
+        let questions = [];
+        let currentQuestionIndex = 0;
+
+        document.getElementById("fetch-questions-btn").addEventListener("click", function() {
+            const inputCode = prompt("Enter Test Code:");
+            if (!inputCode) return;
+
+            fetch("/get_questions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ input_code: inputCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.questions) {
+                    questions = data.questions;
+                    currentQuestionIndex = 0;
+                    showQuestion();
+                }
+            });
+        });
+
+        function showQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                document.getElementById("question-container").style.display = "block";
+                document.getElementById("question-text").innerText = questions[currentQuestionIndex].question;
+                document.getElementById("transcription").value = "";
+                document.getElementById("ai-feedback").innerText = "";
+                document.getElementById("next-btn").style.display = "none";
+            } else {
+                alert("Quiz completed!");
+            }
+        }
+
+        document.getElementById("start-btn").addEventListener("click", function() {
+            fetch("/start", { method: "POST" })
+                .then(() => {
+                    document.getElementById("start-btn").disabled = true;
+                    document.getElementById("stop-btn").disabled = false;
+                });
+        });
+
+        document.getElementById("stop-btn").addEventListener("click", function() {
+            fetch("/stop", { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("transcription").value = data.transcription;
+                    document.getElementById("start-btn").disabled = false;
+                    document.getElementById("stop-btn").disabled = true;
+                });
+        });
+
+        document.getElementById("check-btn").addEventListener("click", function() {
+            const question = questions[currentQuestionIndex].question;
+            const answer = document.getElementById("transcription").value;
+
+            fetch("/check_answer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: question, answer: answer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("ai-feedback").innerText = data.evaluation;
+                document.getElementById("next-btn").style.display = "block";
+            });
+        });
+
+        document.getElementById("next-btn").addEventListener("click", function() {
+            currentQuestionIndex++;
+            showQuestion();
+        });
+    </script>
+</body>
+</html>
