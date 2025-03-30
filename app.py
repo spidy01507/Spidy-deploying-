@@ -69,7 +69,7 @@ model = YOLO(yolo_model_path)
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-cred = credentials.Certificate(os.getenv('FIREBASE_CREDENTIALS'))
+cred = credentials.Certificate("spidy-e12b6-firebase-adminsdk-fbsvc-c6167aba01.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 

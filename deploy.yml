@@ -1,0 +1,31 @@
+name: Deploy App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create Firebase JSON file from GitHub Secret
+        run: echo "$FIREBASE_JSON" > spidy-e12b6-firebase-adminsdk-fbsvc-c6167aba01.json
+        shell: bash
+        env:
+          FIREBASE_JSON: ${{ secrets.FIREBASE_JSON }}
+
+      - name: Run the application
+        run: python app.py
